@@ -3,12 +3,12 @@ requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "openboadicea"
+name = "hbocrisk"
 version = "0.1.0"
 description = "Open re-implementation of the BOADICEA (v6) breast cancer and CanRisk ovarian cancer risk models"
 readme = "README.md"
 requires-python = ">=3.10"
-license = "GPL-3.0-or-later"
+license = "MIT"
 license-files = ["LICENSE"]
 authors = [{ name = "Christopher Schröder", email = "christopher.schroeder@tu-dortmund.de" }]
 keywords = ["BOADICEA", "CanRisk", "breast cancer", "ovarian cancer", "risk prediction", "polygenic risk score"]
@@ -21,21 +21,21 @@ classifiers = [
 dependencies = ["numpy>=1.24", "scipy>=1.10"]
 
 [project.urls]
-Homepage = "https://github.com/christopher-schroeder/openboadicea"
-Repository = "https://github.com/christopher-schroeder/openboadicea.git"
-Issues = "https://github.com/christopher-schroeder/openboadicea/issues"
+Homepage = "https://github.com/christopher-schroeder/hbocrisk"
+Repository = "https://github.com/christopher-schroeder/hbocrisk.git"
+Issues = "https://github.com/christopher-schroeder/hbocrisk/issues"
 
 [project.optional-dependencies]
 test = ["pytest"]
 
 [project.scripts]
-openboadicea = "openboadicea.cli:main"
+hbocrisk = "hbocrisk.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.setuptools.package-data]
-openboadicea = ["data/incidences/*.json", "data/prs/*.prs"]
+hbocrisk = ["data/incidences/*.json", "data/prs/*.prs"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

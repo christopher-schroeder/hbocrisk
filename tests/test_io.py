@@ -3,11 +3,11 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from openboadicea import (Pedigree, Person, GeneticTest, read_canrisk, write_canrisk,
+from hbocrisk import (Pedigree, Person, GeneticTest, read_canrisk, write_canrisk,
                           calculate, Settings)
-from openboadicea.prs import reference_model, read_prs_file
-from openboadicea.riskfactors import BC_RISK_FACTORS, OC_RISK_FACTORS, observe, combine
-from openboadicea.server import handle_request
+from hbocrisk.prs import reference_model, read_prs_file
+from hbocrisk.riskfactors import BC_RISK_FACTORS, OC_RISK_FACTORS, observe, combine
+from hbocrisk.server import handle_request
 
 CANRISK = """##CanRisk 4.0
 ##menarche=13

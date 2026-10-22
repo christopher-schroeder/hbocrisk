@@ -22,7 +22,7 @@ those years; CI5plus England person-years are used as denominators.
 Usage::
 
     python scripts/build_incidences.py data_raw/ci5plus/subset.csv \
-        src/openboadicea/data/incidences [data_raw/ons/ons_counts.json]
+        src/hbocrisk/data/incidences [data_raw/ons/ons_counts.json]
 
 where ``subset.csv`` is the CI5plus ``data.csv`` restricted to the cancer codes
 used here (pancreas 42, breast 67, ovary 86, prostate 101, other female genital

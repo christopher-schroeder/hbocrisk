@@ -3,12 +3,12 @@ import itertools
 import numpy as np
 import pytest
 
-from openboadicea import Pedigree, Person, GeneticTest, calculate, Settings
-from openboadicea.api import _Context, proband_posterior
-from openboadicea.genetics import hpm, major_locus
-from openboadicea.likelihood import PedigreeLikelihood
-from openboadicea.models import BOADICEA, calibrate, cohort_incidences
-from openboadicea import params as P
+from hbocrisk import Pedigree, Person, GeneticTest, calculate, Settings
+from hbocrisk.api import _Context, proband_posterior
+from hbocrisk.genetics import hpm, major_locus
+from hbocrisk.likelihood import PedigreeLikelihood
+from hbocrisk.models import BOADICEA, calibrate, cohort_incidences
+from hbocrisk import params as P
 
 
 def test_hpm_properties():
@@ -79,8 +79,8 @@ def test_calibration_reproduces_population_incidence():
 
 def _brute_force_posterior(ped, ctx):
     """Enumerate all joint genotypes of a 3-person nuclear family."""
-    from openboadicea.api import _person_incs, _usable
-    from openboadicea.likelihood import phenotype_loglik, genetic_test_factor
+    from hbocrisk.api import _person_incs, _usable
+    from hbocrisk.likelihood import phenotype_loglik, genetic_test_factor
     L = ctx.locus
     H = hpm()
     prior = L.genotype_prior(ctx.founder_freqs)
@@ -132,7 +132,7 @@ def test_mz_twins_share_genotype():
 def test_population_risk_without_information():
     """A woman with no family history has the population risk (up to the discrete-year
     approximation: heterogeneity within each year makes the risk slightly lower)."""
-    from openboadicea.incidence import load_population
+    from hbocrisk.incidence import load_population
     ped = Pedigree("T", [Person("p", "F", target=True, age=20, yob=1985)])
     r = calculate(ped)
     lam = load_population("UK").rates("breast_female", 7)

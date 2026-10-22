@@ -138,7 +138,7 @@ def read_prs_file(path_or_text, name=None, mean=None, sd=None, disease="BC"):
 def reference_model(name):
     """Load one of the PRS supported by CanRisk with its published normalisation."""
     f, disease, mean, sd, alpha = REFERENCE_PRS[name]
-    text = resources.files("openboadicea").joinpath("data", "prs", f).read_text()
+    text = resources.files("hbocrisk").joinpath("data", "prs", f).read_text()
     model = read_prs_file(text, name=name, mean=mean, sd=sd, disease=disease)
     model.alpha = alpha
     return model

@@ -73,5 +73,5 @@ class _Handler(BaseHTTPRequestHandler):
 def serve(host="127.0.0.1", port=8080, cors=False):
     _Handler.cors = cors
     httpd = ThreadingHTTPServer((host, port), _Handler)
-    print(f"openboadicea service on http://{host}:{port}")
+    print(f"hbocrisk service on http://{host}:{port}")
     httpd.serve_forever()

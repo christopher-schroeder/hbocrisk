@@ -1,8 +1,8 @@
-"""Compare openboadicea against published BOADICEA/CanRisk results.
+"""Compare hbocrisk against published BOADICEA/CanRisk results.
 
 Run: python scripts/validate.py
 """
-from openboadicea import Pedigree, Person, GeneticTest, calculate, Settings
+from hbocrisk import Pedigree, Person, GeneticTest, calculate, Settings
 
 PANEL = ["BRCA1", "BRCA2", "PALB2", "CHEK2", "ATM", "BARD1", "RAD51C", "RAD51D"]
 
@@ -24,7 +24,7 @@ def row(label, ours, ref, source):
 
 
 def main():
-    print("| scenario | openboadicea (%) | published (%) | rel. diff | source |")
+    print("| scenario | hbocrisk (%) | published (%) | rel. diff | source |")
     print("|---|---|---|---|---|")
     r = calculate(Pedigree("T", [Person("p", "F", target=True, age=25, yob=2001)]))
     src = "CanRisk 7.3.2 web-service test output"

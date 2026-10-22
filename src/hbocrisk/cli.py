@@ -1,8 +1,8 @@
 """Command line interface.
 
-    openboadicea risk family.canrisk [--model BC|OC|both] [--population UK] [--json]
-    openboadicea populations
-    openboadicea serve [--host 127.0.0.1] [--port 8080]
+    hbocrisk risk family.canrisk [--model BC|OC|both] [--population UK] [--json]
+    hbocrisk populations
+    hbocrisk serve [--host 127.0.0.1] [--port 8080]
 """
 import argparse
 import json
@@ -47,7 +47,7 @@ def _print_result(r, out):
 
 
 def main(argv=None):
-    ap = argparse.ArgumentParser(prog="openboadicea", description=__doc__,
+    ap = argparse.ArgumentParser(prog="hbocrisk", description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
     r = sub.add_parser("risk", help="compute carrier probabilities and cancer risks")

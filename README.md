@@ -1,7 +1,7 @@
-# openboadicea
+# hbocrisk
 
-An open Python re-implementation of the **BOADICEA** breast cancer risk model
-(v6 with the CanRisk v2.4 BRCA2 update; v7-compatible for unspecified ethnicity) and the
+**H**ereditary **B**reast and **O**varian **C**ancer **risk**: an open Python
+re-implementation of the **BOADICEA** breast cancer risk model (v6 with the CanRisk v2.4 BRCA2 update; v7-compatible for unspecified ethnicity) and the
 **CanRisk epithelial tubo-ovarian cancer (EOC) model** (v2). It is built from the
 published model descriptions and supplementary material. The only dependencies are
 `numpy` and `scipy`.
@@ -36,11 +36,11 @@ CanRisk are documented in [docs/MODEL.md](docs/MODEL.md).
 ## Installation
 
 ```bash
-pip install git+https://github.com/christopher-schroeder/openboadicea.git
+pip install git+https://github.com/christopher-schroeder/hbocrisk.git
 
 # development install from a clone
-git clone git@github.com:christopher-schroeder/openboadicea.git
-cd openboadicea
+git clone git@github.com:christopher-schroeder/hbocrisk.git
+cd hbocrisk
 pip install -e .            # from this directory
 pip install -e .[test]      # with pytest
 ```
@@ -50,12 +50,12 @@ pip install -e .[test]      # with pytest
 ### Command line
 
 ```bash
-openboadicea risk family.canrisk                 # BOADICEA (breast)
-openboadicea risk family.canrisk --model both    # breast and ovarian models
-openboadicea risk family.canrisk --population Germany --json
-openboadicea risk family.canrisk --prs-vcf sample.vcf --prs-name "BCAC 313" --prs-sample S1
-openboadicea populations                         # available incidence tables
-openboadicea serve --port 8080                   # JSON HTTP service (see below)
+hbocrisk risk family.canrisk                 # BOADICEA (breast)
+hbocrisk risk family.canrisk --model both    # breast and ovarian models
+hbocrisk risk family.canrisk --population Germany --json
+hbocrisk risk family.canrisk --prs-vcf sample.vcf --prs-name "BCAC 313" --prs-sample S1
+hbocrisk populations                         # available incidence tables
+hbocrisk serve --port 8080                   # JSON HTTP service (see below)
 ```
 
 Input files use the CanRisk pedigree format (v1–v4) or the BOADICEA v4 import format.
@@ -65,7 +65,7 @@ Risk factors and PRS go in the file header (`##menarche=13`, `##BMI=24`,
 ### Python
 
 ```python
-from openboadicea import Pedigree, Person, GeneticTest, calculate, Settings
+from hbocrisk import Pedigree, Person, GeneticTest, calculate, Settings
 
 ped = Pedigree("FAM1", [
     Person("m", "F", age=52, yob=1960, bc1=45, pathology={"er": "N", "pr": "N", "her2": "N"}),
@@ -83,20 +83,20 @@ res.to_dict()                       # JSON-serialisable
 ```
 
 `Pedigree.from_dict` / `to_dict`, `read_canrisk` / `write_canrisk` convert between
-formats. `openboadicea.prs` computes PRS z-scores from VCFs or dosage dictionaries.
+formats. `hbocrisk.prs` computes PRS z-scores from VCFs or dosage dictionaries.
 `register_population()` registers your own incidence tables, for example national
 registry data.
 
 ### JSON service (backend for a browser interface)
 
-`openboadicea serve` starts a standard-library HTTP server:
+`hbocrisk serve` starts a standard-library HTTP server:
 
 * `POST /calculate` with `{"canrisk": "<file text>"}` or `{"pedigree": {...}}`, plus an
   optional `"settings": {"model": "BC"|"OC", "population": "UK",
   "mutation_frequencies": "UK", "sensitivities": {"BRCA1": 0.98}}`
 * `GET /populations`
 
-`openboadicea.server.handle_request(payload)` gives the same logic for any web
+`hbocrisk.server.handle_request(payload)` gives the same logic for any web
 framework.
 
 ## Incidence data
@@ -117,7 +117,7 @@ published BOADICEA papers. The Lee et al. 2022 values come from v6 before the 20
 update; that update increases family-history effects slightly, which explains the
 small positive differences in the "mother affected" rows.
 
-| scenario | openboadicea (%) | published (%) | rel. diff | source |
+| scenario | hbocrisk (%) | published (%) | rel. diff | source |
 |---|---|---|---|---|
 | population, age 25: lifetime BC (20-80) | 11.94 | 12 | -0.5% | CanRisk 7.3.2 web-service test output |
 | population, age 25: 10-year BC (40-50) | 1.708 | 1.718 | -0.6% | CanRisk 7.3.2 web-service test output |
@@ -159,7 +159,7 @@ Other checks in `tests/` (`pytest`):
 ## Layout
 
 ```
-src/openboadicea/
+src/hbocrisk/
   params.py       gene RRs, allele frequencies, sensitivities, polygenic variances, pathology
   riskfactors.py  BC and EOC risk factors, continuous height, category amalgamation
   genetics.py     major-gene locus and hypergeometric polygenic model, PRS likelihood
@@ -176,7 +176,14 @@ docs/MODEL.md     model specification and parameter provenance
 
 ## License
 
-openboadicea is free software, distributed under the GNU General Public License,
-version 3 or (at your option) any later version; see [LICENSE](LICENSE). The reference
-PRS files in `src/openboadicea/data/prs/` come from the CanRisk web services
-(github.com/CCGE-BOADICEA/bws, © University of Cambridge, GPL-3.0-or-later).
+hbocrisk is distributed under the MIT License; see [LICENSE](LICENSE).
+
+The reference PRS definitions in `src/hbocrisk/data/prs/` (variant positions, allele
+frequencies and log odds ratios from the publications of the respective PRS) were taken
+from the CanRisk web services (github.com/CCGE-BOADICEA/bws, © University of Cambridge).
+The incidence tables are derived from IARC CI5plus and, for England, from ONS cancer
+registration statistics (Open Government Licence).
+
+BOADICEA and CanRisk are names of the University of Cambridge. hbocrisk is an
+independent project and is not affiliated with or endorsed by the University of
+Cambridge or Cambridge Enterprise.

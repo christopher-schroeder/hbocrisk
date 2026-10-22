@@ -5,7 +5,7 @@ CanRisk incidence tables are not published) and model version differences.
 """
 import pytest
 
-from openboadicea import Pedigree, Person, GeneticTest, calculate, Settings
+from hbocrisk import Pedigree, Person, GeneticTest, calculate, Settings
 
 
 def _family(gene=None, mother_bc=None, yob=1985, all_negative=False):

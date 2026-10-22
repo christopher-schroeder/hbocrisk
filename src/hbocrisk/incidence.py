@@ -1,7 +1,7 @@
 """Population cancer incidence tables (birth-cohort and country specific).
 
 Tables are produced by ``scripts/build_incidences.py`` from IARC CI5plus data and
-stored as JSON in ``openboadicea/data/incidences``. Users can supply their own tables
+stored as JSON in ``hbocrisk/data/incidences``. Users can supply their own tables
 (e.g. national registry data) with :func:`register_population`.
 """
 from functools import lru_cache
@@ -47,7 +47,7 @@ class IncidenceTable:
 
 def available_populations():
     names = set(_CUSTOM)
-    for f in resources.files("openboadicea").joinpath("data", "incidences").iterdir():
+    for f in resources.files("hbocrisk").joinpath("data", "incidences").iterdir():
         if f.name.endswith(".json"):
             names.add(f.name[:-5])
     return sorted(names)
@@ -65,7 +65,7 @@ def load_population(name="UK"):
     name = ALIASES.get(name, name)
     if name in _CUSTOM:
         return _CUSTOM[name]
-    path = resources.files("openboadicea").joinpath("data", "incidences", f"{name}.json")
+    path = resources.files("hbocrisk").joinpath("data", "incidences", f"{name}.json")
     if not path.is_file():
         raise ValueError(f"unknown cancer incidence population '{name}'; available: "
                          f"{available_populations()}")

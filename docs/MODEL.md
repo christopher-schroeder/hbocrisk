@@ -1,6 +1,6 @@
 # Model specification and parameter provenance
 
-This document describes what `openboadicea` implements, where each parameter comes
+This document describes what `hbocrisk` implements, where each parameter comes
 from, and where the implementation had to make a choice that the publications do not
 pin down. References are listed at the end; tags such as `[LEE2022]` are used in the
 source code as well.
@@ -145,7 +145,7 @@ Finland and Sweden are not in CI5plus and are not included.
   ratios, risk-factor and BI-RADS distributions, tumour subtypes) are not
   implemented. For unspecified ethnicity v7 equals the v6 parameterisation used here. The
   ancestry-specific PRS normalisation parameters are available in
-  `openboadicea.prs.ANCESTRY_PRS`.
+  `hbocrisk.prs.ANCESTRY_PRS`.
 * Continuous mammographic density (Volpara/STRATUS, v7.2 [FIC2025M]) is not implemented:
   its regression/normalisation parameters are only in a data supplement that was not
   available. The v7.2 age-specific BI-RADS population distributions are not implemented
