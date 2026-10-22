@@ -36,6 +36,11 @@ CanRisk are documented in [docs/MODEL.md](docs/MODEL.md).
 ## Installation
 
 ```bash
+pip install git+https://github.com/christopher-schroeder/openboadicea.git
+
+# development install from a clone
+git clone git@github.com:christopher-schroeder/openboadicea.git
+cd openboadicea
 pip install -e .            # from this directory
 pip install -e .[test]      # with pytest
 ```
