@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "Open re-implementation of the BOADICEA (v6) breast cancer and CanRisk ovarian cancer risk models"
 readme = "README.md"
 requires-python = ">=3.10"
-license = "MIT"
+license = "GPL-3.0-or-later"
 license-files = ["LICENSE"]
 authors = [{ name = "Christopher Schröder", email = "christopher.schroeder@tu-dortmund.de" }]
 keywords = ["BOADICEA", "CanRisk", "breast cancer", "ovarian cancer", "risk prediction", "polygenic risk score"]

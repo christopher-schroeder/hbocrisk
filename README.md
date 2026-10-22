@@ -173,3 +173,10 @@ src/openboadicea/
 scripts/          incidence builders, validation
 docs/MODEL.md     model specification and parameter provenance
 ```
+
+## License
+
+openboadicea is free software, distributed under the GNU General Public License,
+version 3 or (at your option) any later version; see [LICENSE](LICENSE). The reference
+PRS files in `src/openboadicea/data/prs/` come from the CanRisk web services
+(github.com/CCGE-BOADICEA/bws, © University of Cambridge, GPL-3.0-or-later).
