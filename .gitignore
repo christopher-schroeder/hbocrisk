@@ -218,3 +218,8 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# third-party downloads used during development (papers, raw registry data, reference code)
+papers/
+reference/
+data_raw/
