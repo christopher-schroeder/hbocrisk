@@ -162,6 +162,29 @@ OC_ALLELE_FREQUENCIES = {
     "Iceland": dict(_OC_FREQ_UK, BRCA2=0.003),
 }
 
+# --------------------------------------------------------------------------------------
+# UK ethnic groups (BOADICEA BC v7 / EOC v3) [FIC2025E]
+# --------------------------------------------------------------------------------------
+# Incidence rate ratios relative to the whole UK population (Table 1; South and East
+# Asian grouped). They are applied to the UK incidences only; male breast cancer is
+# independent of ethnicity. 'Other' uses the population incidences (Table S22).
+_IRR_ASIAN = {"breast_female": 0.747, "ovary": 0.752, "prostate": 0.541,
+              "pancreas_female": 0.638, "pancreas_male": 0.689}
+ETHNICITY_IRR = {
+    "White": {"breast_female": 1.037, "ovary": 1.045, "prostate": 1.002,
+              "pancreas_female": 1.028, "pancreas_male": 1.029},
+    "Black": {"breast_female": 0.84, "ovary": 0.69, "prostate": 2.094,
+              "pancreas_female": 1.234, "pancreas_male": 1.111},
+    "South Asian": dict(_IRR_ASIAN),
+    "East Asian": dict(_IRR_ASIAN),
+    "Mixed": {"breast_female": 0.653, "ovary": 0.533, "prostate": 0.782,
+              "pancreas_female": 0.781, "pancreas_male": 0.782},
+    "Other": {},
+}
+# Non-White ethnic groups use the non-European CHEK2 frequency (Table S22).
+ETHNICITY_MUTATION_FREQUENCIES = {g: ("UK" if g == "White" else "UK, non-European")
+                                  for g in ETHNICITY_IRR}
+
 # Default mutation search (panel test) sensitivities, CanRisk v4.1 onwards.
 TEST_SENSITIVITY = {"BRCA1": 0.98, "BRCA2": 0.99, "PALB2": 0.99, "ATM": 0.99, "CHEK2": 0.99,
                     "BARD1": 0.99, "RAD51C": 0.98, "RAD51D": 0.98, "BRIP1": 0.99}

@@ -92,6 +92,23 @@ of the model rather than marginalised [LEE2019].
 * PRS: x_P = α·z + x_R. The proband's penetrance is multiplied by
   f(x_PRS | x_P ∈ bin k) ([LEE2019] eq. s1.14) with bins at the normal quantiles of the
   binomial masses (s1.13).
+* PRS ancestry [FIC2025E]: the raw score is ancestry-independent; its mean μ_i, SD σ_i and
+  α_i depend on the genetic ancestry i (European, African, East Asian, South Asian).
+  `BCAC 309` (BCAC 313 without 4 SNPs not imputed in UK Biobank), `BCAC 307` (also
+  without the 2 SNPs correlated with CHEK2 c.1100del) and `OCAC 36` carry these
+  parameters and ancestry-specific allele frequencies q_ik (CanRisk files
+  `*-UKB_all.prs`, SHARE-PRScalculation v4.2.12, GPL-3.0; downloaded at runtime, not
+  bundled). If the main ancestry proportion P_i
+  reaches the threshold (0.8; 0.7 for South Asian), z = (R − μ_i)/σ_i and α = α_i.
+  Otherwise (mixed genetic ancestry)
+
+      σ² = Σ_i P_i σ_i² + 4 Σ_k w_k² (Σ_i P_i q_ik² − (Σ_i P_i q_ik)²)
+      z  = Σ_i P_i α_i (R − μ_i)/σ_i / (σ · Σ_i P_i α_i/σ_i),   α = Σ_i P_i α_i σ_i / σ
+
+  (`PRSModel.normalise`; agrees with vcf2prs to 1e-7). Missing variants are imputed with
+  the ancestry-specific (proportion-weighted) frequencies. Unknown ancestry uses the
+  population parameters; the European-only reference PRS (e.g. BCAC 313) accept only
+  European or unknown ancestry.
 
 ## 3. Pedigree likelihood and risks
 
@@ -134,6 +151,14 @@ CI5plus has 2–4% fewer breast and 15–20% fewer ovarian registrations. Ovaria
 C56 + C57 (ovary and fallopian tube). Germany (Hamburg, Bremen,
 Schleswig-Holstein, Saarland), Austria and Switzerland are included as extras.
 Finland and Sweden are not in CI5plus and are not included.
+
+**UK ethnic groups (BOADICEA BC v7 / EOC v3)** [FIC2025E]. With `Settings.ethnicity`
+(or the CanRisk header `##ethnicity=<ONS group>;<background>`), the UK incidences are
+multiplied by the ethnic-group incidence rate ratios relative to the UK population
+(Table 1; South and East Asian grouped; male breast cancer unchanged; 'Other' unchanged).
+Non-White groups use the non-European CHEK2 frequency (0.00109) when the mutation
+frequency set is the default `UK`. Baseline (population) risks use the same ethnic
+group. As in CanRisk, an ethnicity can only be combined with the UK incidences.
 `register_population()` lets you supply your own tables.
 
 ## 5. Known differences from CanRisk / not implemented
@@ -141,11 +166,16 @@ Finland and Sweden are not in CI5plus and are not included.
 * The exact CanRisk incidence tables are not published. UK breast cancer risks are
   within about 0.5–1% (relative) of CanRisk 7.3.2 outputs. Ovarian cancer risks are about
   3–5% lower. Other populations have not been compared with CanRisk.
-* BOADICEA v7 ethnicity-specific parameters ([FIC2025E]: UK ethnic-group incidence
-  ratios, risk-factor and BI-RADS distributions, tumour subtypes) are not
-  implemented. For unspecified ethnicity v7 equals the v6 parameterisation used here. The
-  ancestry-specific PRS normalisation parameters are available in
-  `hbocrisk.prs.ANCESTRY_PRS`.
+* BOADICEA v7 ethnicity: the incidence rate ratios, CHEK2 frequencies and the
+  ancestry-specific PRS are implemented. The ethnicity-specific risk-factor and BI-RADS
+  distributions (Tables S18, S21) and breast tumour subtype distributions (Tables
+  S4–S6) are not; the default distributions are used and a warning is given when risk
+  factors, BI-RADS or pathology are supplied. For unspecified ethnicity v7 equals the
+  v6 parameterisation used here. Ovarian cancer risks of BRCA2 carriers by ethnicity
+  agree with [FIC2025E] (to age 80: White 15.2/15, Black 10.3/10, Asian 11.2/11, Mixed
+  8.1/8 %, hbocrisk/published). Breast cancer risks of non-White BRCA2 carriers are 3–4
+  percentage points lower than published (White 58.8/58, Black 51.3/54, South Asian
+  47.3/50, Mixed 42.9/47 %, born 2000); the cause is not known.
 * Continuous mammographic density (Volpara/STRATUS, v7.2 [FIC2025M]) is not implemented:
   its regression/normalisation parameters are only in a data supplement that was not
   available. The v7.2 age-specific BI-RADS population distributions are not implemented

@@ -22,8 +22,10 @@ It uses the following inputs:
   (ER, PR, HER2, CK14, CK5/6)
 * questionnaire-based risk factors, BI-RADS mammographic density and height (continuous)
 * polygenic risk scores, given as z-score and α or computed from a VCF with the CanRisk
-  reference PRS (BCAC 313 etc.)
-* birth cohort, country-specific cancer incidences, and Ashkenazi Jewish ancestry
+  reference PRS (BCAC 313 etc.), with ancestry-specific normalisation for European,
+  African, East Asian, South Asian and mixed genetic ancestry (BCAC 309/307, OCAC 36)
+* birth cohort, country-specific cancer incidences, UK ethnic groups (BOADICEA v7
+  incidences, UK only), and Ashkenazi Jewish ancestry
 
 The model structure, every parameter with its source, and the known deviations from
 CanRisk are documented in [docs/MODEL.md](docs/MODEL.md).
@@ -54,7 +56,10 @@ hbocrisk risk family.canrisk                 # BOADICEA (breast)
 hbocrisk risk family.canrisk --model both    # breast and ovarian models
 hbocrisk risk family.canrisk --population Germany --json
 hbocrisk risk family.canrisk --prs-vcf sample.vcf --prs-name "BCAC 313" --prs-sample S1
+hbocrisk risk family.canrisk --prs-vcf sample.vcf --prs-ancestry EUR=0.6,AFR=0.4   # BCAC 309
+hbocrisk risk family.canrisk --ethnicity Black              # UK incidences only
 hbocrisk populations                         # available incidence tables
+hbocrisk fetch-data                          # download the ancestry PRS files (see below)
 hbocrisk serve --port 8080                   # JSON HTTP service (see below)
 ```
 
@@ -83,7 +88,24 @@ res.to_dict()                       # JSON-serialisable
 ```
 
 `Pedigree.from_dict` / `to_dict`, `read_canrisk` / `write_canrisk` convert between
-formats. `hbocrisk.prs` computes PRS z-scores from VCFs or dosage dictionaries.
+formats. `hbocrisk.prs` computes PRS z-scores from VCFs or dosage dictionaries:
+
+```python
+from hbocrisk.prs import reference_model
+m = reference_model("BCAC 309")
+raw, n = m.raw_score(dosages, ancestry="South Asian")   # missing SNPs: ancestry EAFs
+m.normalise(raw, "South Asian")                          # {'alpha': 0.331, 'zscore': ...}
+m.normalise(raw, {"EUR": 0.55, "AFR": 0.45})             # mixed genetic ancestry
+```
+
+The ancestry-specific PRS files (BCAC 309, BCAC 307 and the ancestry parameters of
+OCAC 36) are not bundled (see License). They are downloaded on first use from a pinned
+commit of SHARE-PRScalculation, checked against their SHA-256, and cached in
+`$HBOCRISK_DATA` (default `~/.cache/hbocrisk`). Without internet access, run
+`hbocrisk fetch-data --dir DIR` elsewhere and set `HBOCRISK_DATA=DIR`.
+
+`Settings(ethnicity="South Asian")` (or the `##ethnicity=` header) selects the BOADICEA
+v7 UK ethnic-group incidences.
 `register_population()` registers your own incidence tables, for example national
 registry data.
 
@@ -93,7 +115,7 @@ registry data.
 
 * `POST /calculate` with `{"canrisk": "<file text>"}` or `{"pedigree": {...}}`, plus an
   optional `"settings": {"model": "BC"|"OC", "population": "UK",
-  "mutation_frequencies": "UK", "sensitivities": {"BRCA1": 0.98}}`
+  "mutation_frequencies": "UK", "sensitivities": {"BRCA1": 0.98}, "ethnicity": "Black"}`
 * `GET /populations`
 
 `hbocrisk.server.handle_request(payload)` gives the same logic for any web
@@ -168,7 +190,8 @@ src/hbocrisk/
   likelihood.py   penetrance, genetic tests, pathology, variable-elimination peeling
   api.py          carrier probabilities and risk calculations (CanRisk conventions)
   pedigree.py     data model, CanRisk/BOADICEA file I/O
-  prs.py          PRS from VCF/dosages, reference PRS parameters
+  prs.py          PRS from VCF/dosages, reference PRS parameters, ancestry normalisation
+  ethnicity.py    UK ethnic groups (BOADICEA v7)
   cli.py, server.py
 scripts/          incidence builders, validation
 docs/MODEL.md     model specification and parameter provenance
@@ -180,7 +203,10 @@ hbocrisk is distributed under the MIT License; see [LICENSE](LICENSE).
 
 The reference PRS definitions in `src/hbocrisk/data/prs/` (variant positions, allele
 frequencies and log odds ratios from the publications of the respective PRS) were taken
-from the CanRisk web services (github.com/CCGE-BOADICEA/bws, © University of Cambridge).
+from the CanRisk web services (github.com/CCGE-BOADICEA/bws, © University of Cambridge);
+the ancestry-specific files `*-UKB_all.prs` (BCAC 309, BCAC 307, OCAC 36) are distributed
+under GPL-3.0 in github.com/CCGE-BOADICEA/SHARE-PRScalculation (v4.2.12, © University of
+Cambridge) and are therefore not part of hbocrisk; they are downloaded at runtime.
 The incidence tables are derived from IARC CI5plus and, for England, from ONS cancer
 registration statistics (Open Government Licence).
 

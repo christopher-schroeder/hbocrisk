@@ -21,7 +21,8 @@ import numpy as np
 
 from . import params as P
 from .genetics import hpm
-from .incidence import load_population
+from .ethnicity import ethnic_group
+from .incidence import ethnic_population, load_population
 from .likelihood import PedigreeLikelihood, genetic_test_factor, phenotype_loglik, _cum
 from .models import (BOADICEA, OVARIAN, FEMALE, MALE, cohort_incidences, proband_incidence,
                      model_risk_factors)
@@ -39,6 +40,9 @@ class Settings:
     mutation_frequencies: object = "UK"    # name or dict gene -> allele frequency
     sensitivities: dict = None              # gene -> mutation search sensitivity
     max_rf_categories: int = 1500
+    # UK ethnic group (BOADICEA v7, UK incidences only; see hbocrisk.ethnicity). None
+    # takes the pedigree's "##ethnicity" header, if any.
+    ethnicity: str = None
 
 
 @dataclass
@@ -77,9 +81,18 @@ class Result:
 class _Context:
     def __init__(self, spec, settings, pedigree):
         self.spec = spec
+        eth = settings.ethnicity
+        if eth is None:
+            eth = pedigree.risk_factors.get("ethnicity")
+        self.ethnicity = ethnic_group(eth)
         self.population = settings.population
-        self.table = load_population(settings.population)
+        if self.ethnicity is not None:
+            self.population = ethnic_population(settings.population, self.ethnicity)
+        self.table = load_population(self.population)
         mf = settings.mutation_frequencies
+        if self.ethnicity is not None and mf == "UK":
+            mf = P.ETHNICITY_MUTATION_FREQUENCIES[self.ethnicity]
+        self.mutation_frequencies = mf if isinstance(mf, str) else "custom"
         if isinstance(mf, dict):
             pop = dict(spec.allele_frequencies["UK"])
             pop.update(mf)
@@ -251,13 +264,35 @@ def _baseline_pedigree(pedigree, age=None, keep_bc1=True):
     p.bc1, p.bc2, p.oc, p.prc, p.pac = bc1, None, None, None, None
     if age is not None:
         p.age = age
-    return Pedigree(pedigree.famid, [p])
+    # same population: keep the ethnicity, drop risk factors and PRS
+    rf = {k: v for k, v in pedigree.risk_factors.items() if k == "ethnicity"}
+    return Pedigree(pedigree.famid, [p], risk_factors=rf)
 
 
 def _with_proband_age(pedigree, age):
     ped = deepcopy(pedigree)
     ped.proband.age = age
     return ped
+
+
+def _ethnicity_warnings(ctx, pedigree):
+    """Parts of BOADICEA v7 that are not ethnicity-specific in hbocrisk."""
+    if ctx.ethnicity is None:
+        return []
+    out = []
+    rfs = {k for k, v in pedigree.risk_factors.items()
+           if k not in ("ethnicity",) and str(v).strip() not in ("", "NA", "0")}
+    if ctx.ethnicity != "White" and rfs - {"birads", "height"}:
+        out.append(f"ethnicity {ctx.ethnicity}: the risk-factor distributions are not "
+                   "ethnicity-specific (default BOADICEA v6 distributions used)")
+    if "birads" in rfs:
+        out.append(f"ethnicity {ctx.ethnicity}: the BI-RADS density distribution is not "
+                   "ethnicity-specific (default distribution used)")
+    if any(p.bc1 is not None and any(v not in ("0", "") for v in p.pathology.values())
+           for p in pedigree.people):
+        out.append(f"ethnicity {ctx.ethnicity}: breast tumour subtype distributions are "
+                   "not ethnicity-specific (default distributions used)")
+    return out
 
 
 def calculate(pedigree, settings=None, calcs=("carrier_probs", "remaining_lifetime",
@@ -270,10 +305,13 @@ def calculate(pedigree, settings=None, calcs=("carrier_probs", "remaining_lifeti
     proband = pedigree.proband
     res = Result(model=spec.name, famid=pedigree.famid, proband=proband.pid,
                  settings={"model": spec.name, "population": settings.population,
+                           "ethnicity": ctx.ethnicity,
+                           "mutation_frequency_set": ctx.mutation_frequencies,
                            "mutation_frequencies": dict(ctx.founder_freqs),
                            "sensitivities": {g: ctx.sensitivities[g] for g in spec.genes}})
     warnings = res.warnings
     warnings.extend(unused_risk_factors(spec, pedigree.risk_factors))
+    warnings.extend(_ethnicity_warnings(ctx, pedigree))
     for p in pedigree.people:
         if p.age and p.age >= P.MAX_AGE and p.affected():
             ages = [c for c in ("bc1", "bc2", "oc", "prc", "pac")

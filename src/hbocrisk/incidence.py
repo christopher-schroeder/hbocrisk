@@ -10,7 +10,7 @@ import json
 
 import numpy as np
 
-from .params import MAX_AGE
+from .params import MAX_AGE, ETHNICITY_IRR
 
 SERIES = ("breast_female", "breast_male", "ovary", "prostate", "pancreas_female",
           "pancreas_male")
@@ -60,8 +60,25 @@ def register_population(name, cohorts, series, meta=None):
     load_population.cache_clear()
 
 
+def ethnic_population(name, ethnicity):
+    """Name of the incidence table for a UK ethnic group (see :mod:`hbocrisk.ethnicity`),
+    e.g. 'UK (Black)'. Only the UK incidences can be combined with an ethnicity."""
+    if ALIASES.get(name, name) != "UK":
+        raise ValueError(f"{name} cancer rates with a UK ethnicity parameter ({ethnicity}) "
+                         "are not valid; ethnicity-specific incidences are only defined "
+                         "for the UK")
+    return f"UK ({ethnicity})"
+
+
 @lru_cache(maxsize=None)
 def load_population(name="UK"):
+    if name.startswith("UK (") and name.endswith(")"):
+        ethnicity = name[4:-1]
+        base = load_population("UK")
+        irr = ETHNICITY_IRR[ethnicity]
+        series = {k: v * irr.get(k, 1.0) for k, v in base.series.items()}
+        return IncidenceTable(name, base.cohorts, series,
+                              dict(base.meta, ethnicity=ethnicity, rate_ratios=irr))
     name = ALIASES.get(name, name)
     if name in _CUSTOM:
         return _CUSTOM[name]
